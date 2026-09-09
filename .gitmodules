@@ -1,0 +1,8 @@
+[submodule "ixformer"]
+	path = third_party/ixformer
+	url = ssh://git@bitbucket.iluvatar.ai:7999/swapp/ixformer.git
+	branch = master
+[submodule "vllm"]
+	path = third_party/vllm
+	url = ssh://git@bitbucket.iluvatar.ai:7999/swapp/vllm.git
+	branch = iluvatar_main

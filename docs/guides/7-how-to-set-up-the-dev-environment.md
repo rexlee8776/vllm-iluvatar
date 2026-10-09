@@ -4,7 +4,7 @@ vllm-iluvatar 的运行依赖 vllm 和 ixformer 两个组件。此前两者各�
 
 ## 目录结构
 
-```
+```text
 vllm-iluvatar/
 └── third_party/
     ├── vllm       (branch: iluvatar_main)

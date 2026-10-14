@@ -1,29 +1,41 @@
 # 如何搭建 vllm-iluvatar 开发环境
 
-vllm-iluvatar 的运行依赖 vllm 和 ixformer 两个组件。此前两者各自独立获取、版本互不关联,容易造成开发环境不一致,出现编译失败或精度对不齐等问题。为此,现将这两个组件以 git submodule 的形式纳入 vllm-iluvatar,由本仓库统一管理其 commit,确保所有开发者获取到一致的版本。本文介绍代码获取、编译、安装的方法,以及在该结构下的日常开发流程。
+vllm-iluvatar 的运行依赖 vllm 和 ixformer 两个组件。两者锁定的 commit 由仓库根目录 `Dockerfile` 顶部的构建参数(`IXFORMER_BRANCH` / `IXFORMER_COMMIT` 与 `VLLM_BRANCH` / `VLLM_COMMIT`)统一管理,作为**唯一来源**:Docker 构建直接使用,本地开发也据此对齐,确保版本一致。
 
-## 目录结构
+> 这两个组件曾以 git submodule 形式纳入本仓库,现已移除。请改用下文的"按 pin 克隆"流程,或直接使用仓库根目录的 `Dockerfile` 做可复现的整链路构建。
 
-```text
-vllm-iluvatar/
-└── third_party/
-    ├── vllm       (branch: iluvatar_main)
-    └── ixformer   (branch: master)
+## 锁定的版本
+
+查看根目录 `Dockerfile` 顶部的构建参数:
+
+```bash
+grep -E "^ARG (IXFORMER|VLLM)_(BRANCH|COMMIT)=" Dockerfile
 ```
-
-各组件锁定的 commit 记录在 `version.json` 的 `pins` 中(包含 branch 与 commit),并与 submodule 指针保持一致。
 
 > ixformer 自身的底层依赖由 ixformer 仓库管理,vllm-iluvatar 仅关注 ixformer 的 commit。相关说明参见 ixformer 仓库的《如何搭建 ixformer 开发环境》。
 
-## 环境搭建
+## 方式一(推荐):用 Dockerfile 做整链路构建
+
+仓库根目录的 `Dockerfile` 会按其内置的 `*_COMMIT` 参数克隆并源码编译 ixinfer / ixformer / vllm,再用**构建上下文(即本仓库源码)**构建安装本插件,产出可直接运行的镜像。适合打包与可复现验证。详见根目录 README 的 Docker 构建小节。
+
+## 方式二:本地按 pin 克隆后手动构建
 
 ```bash
-# 1. 递归拉取组件,对齐锁定的 commit
-cd vllm-iluvatar
-git submodule update --init --recursive
+# 从 Dockerfile 的构建参数读取锁定的 commit
+IXFORMER_SHA=$(sed -n 's/^ARG IXFORMER_COMMIT=//p' Dockerfile)
+VLLM_SHA=$(sed -n 's/^ARG VLLM_COMMIT=//p' Dockerfile)
 
-# 2. 一键编译安装,顺序为 ixformer、vllm
-bash scripts/build_third_party.sh
+# 1. 克隆并对齐 ixformer,随后编译安装(底层依赖见 ixformer 自带脚本)
+git clone ssh://git@bitbucket.iluvatar.ai:7999/swapp/ixformer.git /tmp/ixformer
+git -C /tmp/ixformer checkout "${IXFORMER_SHA}"
+git -C /tmp/ixformer submodule update --init --recursive
+CUDA_ARCH=ivcore11 COREX_HOME=/usr/local/corex bash /tmp/ixformer/scripts/build_dev_env.sh
+
+# 2. 克隆并对齐 vllm,随后编译安装
+git clone ssh://git@bitbucket.iluvatar.ai:7999/swapp/vllm.git /tmp/vllm
+git -C /tmp/vllm checkout "${VLLM_SHA}"
+bash /tmp/vllm/build_vllm.sh
+bash /tmp/vllm/install_vllm.sh
 ```
 
 常用环境变量:
@@ -31,30 +43,38 @@ bash scripts/build_third_party.sh
 - `CUDA_ARCH` / `COREX_ARCH`:目标架构,默认 `ivcore11`。
 - `COREX_HOME`:corex 工具链路径,默认 `/usr/local/corex`,会传递给 ixformer 的构建脚本。
 - `SW_HOME`:同样会传递给 ixformer 的构建脚本。
-- `SKIP_IXFORMER=1`、`SKIP_VLLM=1`:用于跳过对应组件。
+
+## 构建并安装插件
+
+ixformer 与 vllm 就绪后,在本仓库根目录:
+
+```bash
+# 开发用可编辑安装
+bash install_vllm_iluvatar_editable.sh
+
+# 或 wheel 安装
+bash build_vllm_iluvatar.sh
+bash install_vllm_iluvatar.sh
+```
 
 ## 日常开发流程
 
-基本原则:在哪个仓库修改,就在该仓库创建分支并提交 PR,待合入后再更新 submodule 指针。执行 `git submodule update` 后通常处于 detached HEAD 状态,修改前请先切换到分支。
+基本原则:在哪个仓库修改,就在该仓库创建分支并提交 PR,待合入后再回到 vllm-iluvatar 更新 `Dockerfile` 里对应的 `*_COMMIT`。
 
-- **修改 ixformer**:进入 `third_party/ixformer`,创建分支进行修改,并在该仓库内完成编译、测试与 PR 提交(详见 ixformer 的开发环境文档)。合入后返回 vllm-iluvatar 更新 ixformer 的指针。
-- **修改 vllm**:进入 `third_party/vllm`,创建分支进行修改并提交 PR。合入后返回 vllm-iluvatar 更新 vllm 的指针。
+- **修改 ixformer**:在 ixformer 克隆目录创建分支修改,在该仓库内完成编译、测试与 PR 提交(详见 ixformer 的开发环境文档)。合入后更新本仓库 `Dockerfile` 的 `IXFORMER_COMMIT`。
+- **修改 vllm**:在 vllm 克隆目录创建分支修改并提交 PR。合入后更新本仓库 `Dockerfile` 的 `VLLM_COMMIT`。
 
-## 更新 submodule 指针
+## 更新锁定的 commit
 
-更新指针指的是将父仓库中的 gitlink 指向新的 commit 并提交。
+直接编辑根目录 `Dockerfile` 的 `ARG ..._COMMIT`,把对应组件的 commit 改成目标 SHA 并提交即可:
 
 ```bash
-cd vllm-iluvatar
-git -C third_party/ixformer fetch origin        # third_party/vllm 同理
-git -C third_party/ixformer checkout <目标 SHA>
-$EDITOR version.json                             # 同步更新 pins 中的 commit
-git add third_party/ixformer version.json
-git commit -m "[NO-JIRA] bump ixformer submodule"
+$EDITOR Dockerfile   # 修改 ARG IXFORMER_COMMIT= / ARG VLLM_COMMIT=
+git add Dockerfile
+git commit -m "[NO-JIRA] bump ixformer pin"
 ```
 
 注意事项:
 
-- `git add third_party/ixformer` 提交的是指针本身,而非目录内的文件。提交前可用 `git diff --cached` 确认,应仅出现 `-Subproject commit ...` 与 `+Subproject commit ...` 两行。
-- 请勿使用 `git add third_party/ixformer/`(结尾带斜杠),否则会将子仓库工作区中的文件作为普通文件加入。
-- `version.json` 中的 commit 需与 submodule 指针同步修改,保持两者一致。
+- `Dockerfile` 的构建参数是 pin 的唯一来源。
+- 更新 pin 前,请确认目标 commit 已在对应仓库的目标分支上合入。

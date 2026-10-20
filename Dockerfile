@@ -205,12 +205,9 @@ WORKDIR /build
 # IXINFER_CMAKE_ARGS=-DDISABLE_GDR=ON.
 ARG IXINFER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/csyslib/ixinfer.git
 ARG IXINFER_BRANCH=ixinfer
-# Matched to the plugin-tested stack: this is the third_party/ixinfer submodule
-# commit that ixformer ${IXFORMER_COMMIT} (the plugin feat/v0.31.0 pin) points at.
-# Do NOT bump to the ixinfer branch HEAD independently: ixformer's attention /
-# sparse-flash-attn glue is validated only against this exact ixinfer, and a
-# newer ixinfer made ixformer fall back off the ivcore11 attention path.
-ARG IXINFER_COMMIT=a616cf8dc117af9b583a5e55ea197c27ef2131d6
+# Lockstep with ixformer ${IXFORMER_COMMIT}'s third_party/ixinfer submodule.
+# Do NOT bump to the ixinfer branch HEAD independently.
+ARG IXINFER_COMMIT=b9666bf28a82c9cec1101532365a391939a7f99f
 ARG IXINFER_CMAKE_ARGS=
 RUN --mount=type=ssh \
     mkdir -p -m 0700 ~/.ssh \
@@ -242,13 +239,10 @@ RUN --mount=type=ssh \
 # and uses its own vendored headers under src/kernels/infer/ixinfer).
 ARG IXFORMER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/ixformer.git
 ARG IXFORMER_BRANCH=master
-# Pinned to the exact commit the plugin feat/v0.31.0 declares in version.json
-# ("pins": {"ixformer": {"branch": "master", "commit": "63ad530..."}}). Verified:
-# the latest master HEAD (2e1a221b) builds and imports but logs "ixattn ... not
-# supported on arch 'ivcore11'; falling back" and runs the slow fallback path;
-# this pin removes that warning and restores the fast ivcore11 attention kernels
-# (~7.3x decode throughput in the smoke test). Keep ixinfer in lockstep above.
-ARG IXFORMER_COMMIT=63ad530151c62e553bc0404ce2fd64fc41ec4d44
+# ixformer master already contains the V4.1 kernels previously pinned at
+# 739abab2 (deepseekv41 files are identical on 573eda3f). Keep ixinfer in
+# lockstep above.
+ARG IXFORMER_COMMIT=573eda3fbdb44756c21124ba61f3fabfac0f0ef9
 RUN --mount=type=ssh \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \

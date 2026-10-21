@@ -207,7 +207,7 @@ ARG IXINFER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/csyslib/ixinfer.git
 ARG IXINFER_BRANCH=ixinfer
 # Lockstep with ixformer ${IXFORMER_COMMIT}'s third_party/ixinfer submodule.
 # Do NOT bump to the ixinfer branch HEAD independently.
-ARG IXINFER_COMMIT=b9666bf28a82c9cec1101532365a391939a7f99f
+ARG IXINFER_COMMIT=774e4da569dcc63c5460deadefb937d9dfbae186
 ARG IXINFER_CMAKE_ARGS=
 RUN --mount=type=ssh \
     mkdir -p -m 0700 ~/.ssh \
@@ -239,10 +239,9 @@ RUN --mount=type=ssh \
 # and uses its own vendored headers under src/kernels/infer/ixinfer).
 ARG IXFORMER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/ixformer.git
 ARG IXFORMER_BRANCH=master
-# ixformer master already contains the V4.1 kernels previously pinned at
-# 739abab2 (deepseekv41 files are identical on 573eda3f). Keep ixinfer in
-# lockstep above.
-ARG IXFORMER_COMMIT=573eda3fbdb44756c21124ba61f3fabfac0f0ef9
+# Merged master includes the MiniMax-M3 FP8 APIs, shared-storage producer
+# and 64-bit KV-cache addressing fixes. Keep ixinfer in lockstep above.
+ARG IXFORMER_COMMIT=e6c95fe6d37116519847b6a58faaede4850f085c
 RUN --mount=type=ssh \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \

@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright (c) 2026 Shanghai Iluvatar CoreX Semiconductor Co., Ltd.
+# Python helpers used by the four source builds. setuptools-rust is a Python
+# packaging helper, not a Rust toolchain; the optional vLLM frontend is not built.
+setuptools-scm
+setuptools-rust
+wheel
+pytest
+tabulate

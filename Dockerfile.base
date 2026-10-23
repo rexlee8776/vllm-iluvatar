@@ -1,0 +1,179 @@
+# Stable CoreX environment. Build this only when SDK/Python dependencies change.
+# See docker/README.md for runtime-base and build-base tags and build commands.
+# Extracted from the repository Dockerfile; source libraries belong to Dockerfile.
+
+# Base: Docker-Hub-blocked hosts need a reachable mirror; this default works on
+# 0.26. Point UBUNTU_IMAGE at ubuntu:24.04 (or a Harbor base) elsewhere.
+ARG UBUNTU_IMAGE=docker.m.daocloud.io/library/ubuntu:24.04
+
+ARG PYTHON_VERSION=3.12
+ARG COREX_ARCH=ivcore11
+ARG COREX_VERSION=5.0.1
+
+# CoreX FTP roots. COREX_PKG_URL feeds the SDK + driver; torch/triton default to
+# the same root. Keep them on the same CoreX release (ABI risk otherwise).
+ARG COREX_PKG_URL=http://sw.iluvatar.ai/download/corex/release_packages/5.0.1/x86_64/20261010
+ARG TORCH_PKG_URL=${COREX_PKG_URL}
+ARG TRITON_PKG_URL=${COREX_PKG_URL}
+
+# numpy pin. CoreX torch (even the 2.13 build in 5.0.1) is compiled against the
+# NumPy 1.x C ABI — the vllm-iluvatar requirements.txt still pins numpy<2 on the
+# 0.31.0 branch for exactly this reason — so keep it unless a future CoreX torch
+# is rebuilt against numpy 2.x.
+ARG NUMPY_SPEC=numpy<2
+
+# Faster pip inside China; applies to the build-time pip installs too.
+ARG PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+
+############################# COREX-BASE #####################################
+# ubuntu + CoreX SDK + torch + triton. Shared by builder and runtime.
+# Installs NO driver libs and runs NO torch import (torch cannot import without
+# the driver, which is intentionally absent here).
+FROM ${UBUNTU_IMAGE} AS corex-base
+SHELL ["/bin/bash", "-c"]
+
+ARG PYTHON_VERSION
+ARG COREX_ARCH
+ARG COREX_VERSION
+ARG COREX_PKG_URL
+ARG TORCH_PKG_URL
+ARG TRITON_PKG_URL
+ARG NUMPY_SPEC
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    LANG=C.UTF-8 \
+    COREX_HOME=/usr/local/corex \
+    COREX_ARCH=${COREX_ARCH} \
+    CUDA_ARCH=${COREX_ARCH} \
+    COREX_VERSION=${COREX_VERSION}
+ENV PATH=/usr/local/corex/bin:${PATH} \
+    LD_LIBRARY_PATH=/usr/local/corex/lib64:/usr/local/lib
+
+# System + Python runtime deps.
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates wget curl git jq \
+        python${PYTHON_VERSION} python${PYTHON_VERSION}-dev python3-pip python-is-python3 \
+        libgl1 libglib2.0-0 libgomp1 libnuma1 numactl \
+        libopenmpi3t64 \
+    && rm -f /usr/lib/python*/EXTERNALLY-MANAGED \
+    && ln -sf /usr/bin/python${PYTHON_VERSION} /usr/local/bin/python3 \
+    && ln -sf /usr/bin/python${PYTHON_VERSION} /usr/local/bin/python \
+    && rm -rf /var/lib/apt/lists/*
+
+# numpy pin (CoreX torch is NumPy-1.x ABI) + setuptools<82 (pkg_resources).
+# Applies to every pip resolve below via PIP_CONSTRAINT.
+RUN printf '%s\nsetuptools<82\n' "${NUMPY_SPEC}" > /etc/pip-constraint.txt
+ENV PIP_CONSTRAINT=/etc/pip-constraint.txt
+RUN python3 -m pip install --no-cache-dir --ignore-installed -U pip 'setuptools<82' wheel
+
+# Generic CoreX FTP installer: finds the single matching artifact in a dir and
+# installs it (.run via bash, .whl via pip).
+COPY <<'SH' /usr/local/bin/ftp_install
+#!/usr/bin/env bash
+set -euo pipefail
+# ftp_install <base_url> <subdir> <name> <run|whl> [extra pip/run args...]
+base="${1%/}"; sub="$2"; name="$3"; kind="$4"; shift 4
+norm="$(echo "$name" | sed 's/[-.]/_/g')"
+if [ "$kind" = "whl" ]; then pat="(^|/)${norm}-.*\.whl$"; else pat="${name}.*\.(run|sh)$"; fi
+page="$(wget -qO- "${base}/${sub}/")"
+file="$(printf '%s' "$page" | grep -oE 'href="[^"]+"' | sed 's/^href="//;s/"$//' | grep -E "$pat" | grep -v md5 | head -1)"
+[ -n "$file" ] || { echo "ftp_install: no match for '$name' ($kind) in ${base}/${sub}" >&2; exit 1; }
+bn="$(basename "$file")"
+echo "ftp_install: fetching ${base}/${sub}/${bn}"
+wget -nv "${base}/${sub}/${file}" -O "/tmp/${bn}"
+case "$kind" in
+  run) bash "/tmp/${bn}" "$@" ;;
+  whl) pip3 install --no-cache-dir --prefer-binary "$@" "/tmp/${bn}" ;;
+esac
+rm -f "/tmp/${bn}"
+SH
+RUN chmod +x /usr/local/bin/ftp_install
+
+# CoreX cmake (newer than apt's; the native builds need a recent cmake).
+RUN set -euo pipefail; U="${COREX_PKG_URL%/}"; \
+    f="$(wget -qO- "$U/tools/" | grep -oE 'href="cmake[^"]+\.sh"' | sed 's/^href="//;s/"$//' | grep -v md5 | head -1)"; \
+    wget -nv "$U/tools/$f" -O /tmp/cmake.sh; \
+    bash /tmp/cmake.sh --skip-license --prefix=/usr/local; \
+    rm -f /tmp/cmake.sh
+
+# CoreX SDK (.run). Only what this source-build chain links/loads:
+#   * corex-toolkit : clang/ixcc + CUDA-compat runtime (cudart/cublas/curand/
+#                     gdrapi/ixthunk) used by ixinfer/ixformer/vllm.
+#   * ixdnn / ixccl : cudnn / nccl equivalents linked by ixformer.
+#   * ixshmem / ucx : ixformer comm layer / NIXL transport.
+#   * ixattention-backend : CoreX Torch loads libixattnbkd.so.1 at import time.
+# The ixinfer SDK is deliberately NOT installed; libcuinfer.so is compiled from
+# the pinned source in the builder stage and copied into the runtime image.
+RUN set -euo pipefail; U="${COREX_PKG_URL}"; \
+    ftp_install "$U" sdk corex-toolkit       run --silent --toolkit --toolbox; \
+    ftp_install "$U" sdk ixdnn               run; \
+    ftp_install "$U" sdk ixccl               run; \
+    ftp_install "$U" sdk ixshmem             run; \
+    ftp_install "$U" sdk ucx                 run; \
+    ftp_install "$U" sdk ixattention-backend run; \
+    ldconfig
+
+# torch + torchvision + triton (.whl). Versions follow *_PKG_URL (CoreX 5.0.1:
+# torch 2.13.0 / torchvision 0.28.0 / triton 3.6.0). No import check here — torch
+# cannot import without the driver. torchvision is REQUIRED: vLLM 0.31's
+# kernel_warmup unconditionally imports qwen3_vl -> transformers qwen2_vl image
+# processor -> torchvision, even for text-only models, so a missing torchvision
+# aborts engine startup. The ftp_install "torch" pattern anchors a literal
+# trailing dash (torch-), so it never matches the torchvision wheel.
+RUN set -euo pipefail; PYV="py${PYTHON_VERSION}"; \
+    ftp_install "${TORCH_PKG_URL}"  "apps/${PYV}" torch       whl; \
+    ftp_install "${TORCH_PKG_URL}"  "apps/${PYV}" torchvision whl --no-deps; \
+    ftp_install "${TRITON_PKG_URL}" "apps/${PYV}" triton      whl
+
+# Stable compilation tools are also available in the runtime base.
+ARG PIP_INDEX_URL
+ENV PIP_INDEX_URL=${PIP_INDEX_URL} COREX_PYTHON_VERSION=${PYTHON_VERSION}
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        build-essential ninja-build openssh-client binutils kmod \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python build helpers and runtime dependencies are installed once, before any
+# ixinfer/ixformer/vLLM/plugin source is introduced. No GPU driver is needed here.
+COPY requirements.txt /opt/iluvatar-base/requirements.txt
+COPY docker/requirements-build.txt /opt/iluvatar-base/requirements-build.txt
+COPY docker/check-base.py /usr/local/bin/iluvatar-check-base
+# Freeze vendor wheels so dependency resolution cannot replace CoreX builds.
+RUN python3 -c 'import importlib.metadata as m; print("\n".join(n + "==" + m.version(n) for n in ("torch", "torchvision", "triton")))' >> /etc/pip-constraint.txt
+RUN chmod +x /usr/local/bin/iluvatar-check-base \
+    && python3 -m pip install --only-binary=:all: --no-cache-dir uv \
+    && uv pip install --system --index-url "${PIP_INDEX_URL}" --only-binary :all: \
+         --constraint /etc/pip-constraint.txt \
+         -r /opt/iluvatar-base/requirements.txt \
+         -r /opt/iluvatar-base/requirements-build.txt \
+    && uv cache clean \
+    && iluvatar-check-base --write-manifest --sdk-url "${COREX_PKG_URL}" \
+    && rm -rf /root/.cache/uv /root/.cache/pip
+
+# Only the build-base variant contains vendor user-space driver libraries.
+# No kernel-module installer is run. Never use this variant as the runtime base.
+FROM corex-base AS build-base
+ARG COREX_PKG_URL
+RUN set -euo pipefail; \
+    ftp_install "${COREX_PKG_URL}" sdk corex-driver run --noexec --target /tmp/corex-driver \
+    && install -m 0755 /tmp/corex-driver/corex/lib64/libcuda.so.1 /usr/local/corex/lib64/libcuda.so.1 \
+    && ln -sf libcuda.so.1 /usr/local/corex/lib64/libcuda.so \
+    && install -m 0755 /tmp/corex-driver/corex/lib64/libixml.so /usr/local/corex/lib64/libixml.so \
+    && rm -rf /tmp/corex-driver \
+    && ldconfig \
+    && python3 -c "import torch, triton; print('torch', torch.__version__, '| triton', triton.__version__)"
+
+LABEL ai.iluvatar.base.variant="build"
+WORKDIR /build
+CMD ["/bin/bash"]
+
+# Default output: SDK, Torch, Triton, build tools and Python dependencies,
+# without libcuda/libixml. Supply host-compatible user-space driver files at run time.
+FROM corex-base AS runtime-base
+LABEL org.opencontainers.image.title="Iluvatar CoreX base" \
+      ai.iluvatar.base.variant="runtime" \
+      ai.iluvatar.corex.version="${COREX_VERSION}" \
+      ai.iluvatar.corex.arch="${COREX_ARCH}"
+CMD ["/bin/bash"]

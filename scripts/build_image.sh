@@ -10,9 +10,10 @@
 #
 # The image is tagged for the Harbor registry with a CPU-arch + build-date suffix:
 #   <REGISTRY>/<PROJECT>/<NAME>:<BASE_TAG>-<ARCH>-<BUILD_DATE>
-# e.g. 10.150.9.98:80/aac-llmfp/vllm-iluvatar:0.31.0-corex5.0.1-py3.12-ubuntu24.04-x86_64-20261014
-# ARCH defaults to the build host's `uname -m` (x86_64 / aarch64); the
-# registry/project prefix is REQUIRED to `docker push` to Harbor.
+# e.g. 10.150.9.98:80/aac-llmfp/vllm-iluvatar-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-20261028
+# The vLLM version is part of the repository name, not the tag. ARCH defaults to
+# the build host's `uname -m` (x86_64 / aarch64); the registry/project prefix is
+# REQUIRED to `docker push` to Harbor.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -20,8 +21,8 @@ cd "${ROOT_DIR}"
 
 REGISTRY="${REGISTRY:-10.150.9.98:80}"
 PROJECT="${PROJECT:-aac-llmfp}"
-NAME="${NAME:-vllm-iluvatar}"
-BASE_TAG="${BASE_TAG:-0.31.0-corex5.0.1-py3.12-ubuntu24.04}"
+NAME="${NAME:-vllm-iluvatar-0.31.0}"
+BASE_TAG="${BASE_TAG:-corex5.0.1-ubuntu24.04-python3.12}"
 ARCH="${ARCH:-$(uname -m)}"
 BUILD_DATE="${BUILD_DATE:-$(date +%Y%m%d)}"
 IMAGE="${REGISTRY}/${PROJECT}/${NAME}:${BASE_TAG}-${ARCH}-${BUILD_DATE}"

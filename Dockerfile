@@ -1,7 +1,7 @@
 # Source-only build: ixinfer, ixformer, vLLM and vllm-iluvatar.
 # Build Dockerfile.base first; see docker/README.md. No SDK/PyPI downloads here.
-ARG BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base:0.31.0-corex5.0.1-ubuntu24.04-python3.12-20261023
-ARG BUILD_BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base:0.31.0-corex5.0.1-ubuntu24.04-python3.12-20261023-build
+ARG BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-20261023
+ARG BUILD_BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-20261023-build
 ARG MAX_JOBS=64
 ARG VLLM_ILUVATAR_COMMIT
 ARG IXINFER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/csyslib/ixinfer.git

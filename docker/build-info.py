@@ -19,8 +19,19 @@ def main():
         return
     sources = {}
     for name in ('ixinfer', 'ixformer', 'vllm', 'vllm_iluvatar'):
-        commit = os.environ.get(name.upper() + '_COMMIT', '')
+        if name == 'ixinfer':
+            # The Dockerfile resolves this revision from ixformer's gitlink and
+            # records the commit alongside the compiled libraries.
+            revision_file = Path('/ixinfer-dist/ixinfer-revision.txt')
+            try:
+                commit = revision_file.read_text().strip()
+            except OSError as exc:
+                parser.error('Cannot read compiled ixinfer revision: ' + str(exc))
+        else:
+            commit = os.environ.get(name.upper() + '_COMMIT', '')
         if not re.fullmatch(r'[0-9a-f]{40}', commit):
+            if name == 'ixinfer':
+                parser.error('Invalid compiled ixinfer revision in ' + str(revision_file))
             parser.error('Pass --build-arg ' + name.upper() + '_COMMIT=<full 40-character commit>')
         sources[name] = commit
     # Ordinary clones can also check HEAD and tracked modifications. Worktree

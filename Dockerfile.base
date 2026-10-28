@@ -6,13 +6,14 @@
 # 0.26. Point UBUNTU_IMAGE at ubuntu:24.04 (or a Harbor base) elsewhere.
 ARG UBUNTU_IMAGE=docker.m.daocloud.io/library/ubuntu:24.04
 
+ARG CPU_ARCH=x86_64
 ARG PYTHON_VERSION=3.12
 ARG COREX_ARCH=ivcore11
 ARG COREX_VERSION=5.0.1
 
 # CoreX FTP roots. COREX_PKG_URL feeds the SDK + driver; torch/triton default to
 # the same root. Keep them on the same CoreX release (ABI risk otherwise).
-ARG COREX_PKG_URL=http://sw.iluvatar.ai/download/corex/release_packages/5.0.1/x86_64/20261010
+ARG COREX_PKG_URL=http://sw.iluvatar.ai/download/corex/release_packages/5.0.1/${CPU_ARCH}/20261010
 ARG TORCH_PKG_URL=${COREX_PKG_URL}
 ARG TRITON_PKG_URL=${COREX_PKG_URL}
 
@@ -32,6 +33,7 @@ ARG PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 FROM ${UBUNTU_IMAGE} AS corex-base
 SHELL ["/bin/bash", "-c"]
 
+ARG CPU_ARCH
 ARG PYTHON_VERSION
 ARG COREX_ARCH
 ARG COREX_VERSION
@@ -39,6 +41,14 @@ ARG COREX_PKG_URL
 ARG TORCH_PKG_URL
 ARG TRITON_PKG_URL
 ARG NUMPY_SPEC
+
+# CPU_ARCH selects package paths; --platform selects the container CPU platform.
+# Refuse a label/package mismatch before installing any SDK artifacts.
+RUN case "${CPU_ARCH}" in x86_64|aarch64) ;; *) exit 1 ;; esac \
+    && test "$(uname -m)" = "${CPU_ARCH}" \
+    && case "${COREX_ARCH}" in ivcore11|ivcore30) ;; *) exit 1 ;; esac
+LABEL ai.iluvatar.cpu.arch="${CPU_ARCH}" \
+      ai.iluvatar.corex.arch="${COREX_ARCH}"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \

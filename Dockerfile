@@ -1,7 +1,11 @@
 # Source-only build: ixinfer, ixformer, vLLM and vllm-iluvatar.
 # Build Dockerfile.base first; see docker/README.md. No SDK/PyPI downloads here.
-ARG BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-20261023
-ARG BUILD_BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-20261023-build
+ARG BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261023
+ARG BUILD_BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261023-build
+# Optional expectations: actual GPU compilation target is inherited from base.
+# Keep separate names so an ARG cannot disguise an incompatible base ENV.
+ARG CPU_ARCH
+ARG TARGET_COREX_ARCH
 ARG MAX_JOBS=64
 ARG VLLM_ILUVATAR_COMMIT
 ARG IXINFER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/csyslib/ixinfer.git
@@ -20,6 +24,10 @@ ARG VLLM_COMMIT=341bf7d4d1244424c94296ce4fc5626ad14b827a
 ARG VLLM_SCM_VERSION=0.31.0
 
 FROM ${BUILD_BASE_IMAGE} AS ixinfer-builder
+ARG CPU_ARCH
+ARG TARGET_COREX_ARCH
+RUN test -z "${CPU_ARCH}" || test "$(uname -m)" = "${CPU_ARCH}"
+RUN test -z "${TARGET_COREX_ARCH}" || test "${COREX_ARCH}" = "${TARGET_COREX_ARCH}"
 ARG MAX_JOBS
 ENV PIP_NO_INDEX=1 UV_OFFLINE=1
 WORKDIR /build
@@ -109,6 +117,10 @@ RUN --mount=type=ssh \
 
 # vLLM packaging is independent of the ixinfer/ixformer source commits.
 FROM ${BUILD_BASE_IMAGE} AS vllm-builder
+ARG CPU_ARCH
+ARG TARGET_COREX_ARCH
+RUN test -z "${CPU_ARCH}" || test "$(uname -m)" = "${CPU_ARCH}"
+RUN test -z "${TARGET_COREX_ARCH}" || test "${COREX_ARCH}" = "${TARGET_COREX_ARCH}"
 ARG MAX_JOBS
 ENV PIP_NO_INDEX=1 UV_OFFLINE=1
 WORKDIR /build
@@ -173,6 +185,10 @@ RUN cp /build/ixformer/build_pip/ixformer-*.whl /wheels/ \
     && cp /build/vllm-iluvatar/build_pip/vllm_iluvatar-*.whl /wheels/
 
 FROM ${BASE_IMAGE} AS runtime
+ARG CPU_ARCH
+ARG TARGET_COREX_ARCH
+RUN test -z "${CPU_ARCH}" || test "$(uname -m)" = "${CPU_ARCH}"
+RUN test -z "${TARGET_COREX_ARCH}" || test "${COREX_ARCH}" = "${TARGET_COREX_ARCH}"
 ARG IXFORMER_COMMIT
 ARG VLLM_COMMIT
 ARG VLLM_ILUVATAR_COMMIT

@@ -6,11 +6,14 @@ ARG MAX_JOBS=64
 ARG VLLM_ILUVATAR_COMMIT
 ARG IXINFER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/csyslib/ixinfer.git
 ARG IXINFER_BRANCH=ixinfer
-ARG IXINFER_COMMIT=774e4da569dcc63c5460deadefb937d9dfbae186
+# No IXINFER_COMMIT here on purpose: ixformer's third_party/ixinfer gitlink is
+# the only thing that can be in lockstep with the ixformer being compiled, so
+# the ixinfer stage reads it from there. A second pin to maintain by hand could
+# only ever drift.
 ARG IXINFER_CMAKE_ARGS=
 ARG IXFORMER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/ixformer.git
 ARG IXFORMER_BRANCH=master
-ARG IXFORMER_COMMIT=097776316475824c421684ac8a44a22a75ab97d8
+ARG IXFORMER_COMMIT=24a45588fa0d88aa90f72db36536ebe15de0523d
 ARG VLLM_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/vllm.git
 ARG VLLM_BRANCH=feat/v0.31.0
 ARG VLLM_COMMIT=341bf7d4d1244424c94296ce4fc5626ad14b827a
@@ -34,13 +37,28 @@ RUN iluvatar-check-base --check-requirements /tmp/plugin-requirements.txt
 # IXINFER_CMAKE_ARGS=-DDISABLE_GDR=ON.
 ARG IXINFER_REPO
 ARG IXINFER_BRANCH
-# Lockstep with ixformer ${IXFORMER_COMMIT}'s third_party/ixinfer submodule.
-# Do NOT bump to the ixinfer branch HEAD independently.
-ARG IXINFER_COMMIT
 ARG IXINFER_CMAKE_ARGS
+# The commit comes from ixformer's third_party/ixinfer gitlink at
+# ${IXFORMER_COMMIT}; reading it here is what keeps the two in lockstep without
+# a second pin to bump. The clone asks for --filter=blob:none, which this
+# Bitbucket ignores, so budget for a full ~24MB clone that is thrown away.
+ARG IXFORMER_REPO
+ARG IXFORMER_BRANCH
+ARG IXFORMER_COMMIT
 RUN --mount=type=ssh \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
+    && git clone --filter=blob:none --no-checkout \
+         --branch "${IXFORMER_BRANCH}" "${IXFORMER_REPO}" ixformer-pin \
+    && git -C ixformer-pin fetch origin "${IXFORMER_COMMIT}" \
+    && IXINFER_COMMIT="$(git -C ixformer-pin ls-tree "${IXFORMER_COMMIT}" \
+         third_party/ixinfer | awk '{print $3}')" \
+    && if [ -z "${IXINFER_COMMIT}" ]; then \
+         echo "third_party/ixinfer is not a submodule at ${IXFORMER_COMMIT}" >&2; \
+         exit 1; \
+       fi \
+    && echo "ixinfer pinned by ixformer: ${IXINFER_COMMIT}" \
+    && rm -rf ixformer-pin \
     && git clone --branch "${IXINFER_BRANCH}" "${IXINFER_REPO}" ixinfer \
     && git -C ixinfer fetch origin "${IXINFER_COMMIT}" \
     && git -C ixinfer checkout "${IXINFER_COMMIT}" \
@@ -57,11 +75,11 @@ RUN --mount=type=ssh \
     && ldconfig \
     && mkdir -p /ixinfer-dist \
     && cp -a /usr/local/corex/lib64/libcuinfer*.so* /ixinfer-dist/ \
+    && printf '%s\n' "${IXINFER_COMMIT}" > /ixinfer-dist/ixinfer-revision.txt \
     && ls -l /ixinfer-dist
 
 
 FROM ixinfer-builder AS ixformer-builder
-ARG IXINFER_COMMIT
 # ---- 2) ixformer -----------------------------------------------------------
 # Only two submodules are compile inputs: third_party/pybind11 (add_subdirectory)
 # and third_party/ixmma (FMHA/MMA headers). third_party/json is in-tree;
@@ -71,7 +89,8 @@ ARG IXINFER_COMMIT
 ARG IXFORMER_REPO
 ARG IXFORMER_BRANCH
 # Merged master includes the MiniMax-M3 FP8 APIs, shared-storage producer
-# and 64-bit KV-cache addressing fixes. Keep ixinfer in lockstep above.
+# and 64-bit KV-cache addressing fixes. The ixinfer stage above derives its
+# commit from this one's third_party/ixinfer, so the two cannot disagree.
 ARG IXFORMER_COMMIT
 RUN --mount=type=ssh \
     mkdir -p -m 0700 ~/.ssh \
@@ -81,7 +100,6 @@ RUN --mount=type=ssh \
     && git -C ixformer checkout "${IXFORMER_COMMIT}" \
     && git -C ixformer submodule update --init --recursive \
          third_party/pybind11 third_party/ixmma \
-    && test "$(git -C ixformer ls-tree HEAD third_party/ixinfer | awk '{print $3}')" = "${IXINFER_COMMIT}" \
     && cd ixformer \
     && COREX_ARCH=${COREX_ARCH} CUDA_ARCH=${COREX_ARCH} \
        MAX_JOBS=${MAX_JOBS:-$(nproc)} COREX_VERSION=${COREX_VERSION} \
@@ -132,8 +150,10 @@ RUN python3 -m pip install --no-deps /wheels/vllm-*.whl
 # wheel can stamp its git id).
 COPY . /build/vllm-iluvatar
 RUN python3 /build/vllm-iluvatar/docker/build-info.py --write /build/iluvatar-build-info.json
+# The ixinfer revision is not a label: it is resolved inside the ixinfer stage
+# rather than passed in, and LABEL cannot read it back. It travels as
+# /etc/iluvatar-ixinfer-revision in the runtime image instead.
 LABEL org.opencontainers.image.revision="${VLLM_ILUVATAR_COMMIT}" \
-      ai.iluvatar.source.ixinfer.revision="${IXINFER_COMMIT}" \
       ai.iluvatar.source.ixformer.revision="${IXFORMER_COMMIT}" \
       ai.iluvatar.source.vllm.revision="${VLLM_COMMIT}"
 
@@ -153,7 +173,6 @@ RUN cp /build/ixformer/build_pip/ixformer-*.whl /wheels/ \
     && cp /build/vllm-iluvatar/build_pip/vllm_iluvatar-*.whl /wheels/
 
 FROM ${BASE_IMAGE} AS runtime
-ARG IXINFER_COMMIT
 ARG IXFORMER_COMMIT
 ARG VLLM_COMMIT
 ARG VLLM_ILUVATAR_COMMIT
@@ -169,14 +188,15 @@ RUN iluvatar-check-base --check-requirements /tmp/plugin-requirements.txt \
     && rm /tmp/plugin-requirements.txt /tmp/build-base-manifest.json
 COPY --from=ixinfer-builder /ixinfer-dist/ /usr/local/corex/lib64/
 COPY --from=ixinfer-builder /usr/local/corex/include/ixinfer.h /usr/local/corex/include/ixinfer.h
-RUN test -s /usr/local/corex/include/ixinfer.h && ldconfig
+# The revision file ships beside the libraries; keep it out of the library dir.
+RUN mv /usr/local/corex/lib64/ixinfer-revision.txt /etc/iluvatar-ixinfer-revision \
+    && test -s /usr/local/corex/include/ixinfer.h && ldconfig
 COPY --from=builder /wheels/ /tmp/wheels/
 # All dependencies already live in BASE_IMAGE. Never resolve/replace CoreX Torch here.
 RUN PIP_NO_INDEX=1 python3 -m pip install --no-deps /tmp/wheels/*.whl \
     && rm -rf /tmp/wheels \
     && python3 -c "import importlib.metadata as m; print('vllm_iluvatar', m.version('vllm_iluvatar'))"
 LABEL org.opencontainers.image.revision="${VLLM_ILUVATAR_COMMIT}" \
-      ai.iluvatar.source.ixinfer.revision="${IXINFER_COMMIT}" \
       ai.iluvatar.source.ixformer.revision="${IXFORMER_COMMIT}" \
       ai.iluvatar.source.vllm.revision="${VLLM_COMMIT}" \
       org.opencontainers.image.title="vllm-iluvatar" \

@@ -39,6 +39,15 @@ if [[ "${CPU_ARCH}" != x86_64 || "${COREX_ARCH}" != ivcore11 ]]; then
   : "${BUILD_BASE_IMAGE:?Provide the matching build base}"
 fi
 BUILD_DATE="${BUILD_DATE:-$(TZ=Asia/Shanghai date +%Y%m%d)}"
+# The plugin source is this checkout, so its commit is what the image records;
+# docker/build-info.py rejects the build without it. Override only when the
+# context has no git history (e.g. an exported tarball).
+if [[ -z "${VLLM_ILUVATAR_COMMIT:-}" ]]; then
+  if ! VLLM_ILUVATAR_COMMIT="$(git -C "${ROOT_DIR}" rev-parse HEAD 2>/dev/null)"; then
+    echo "Not a git checkout: set VLLM_ILUVATAR_COMMIT=<full 40-character commit>" >&2
+    exit 2
+  fi
+fi
 IMAGE="${REGISTRY}/${PROJECT}/${NAME}:${BASE_TAG}-${CPU_ARCH}-${COREX_ARCH}-${BUILD_DATE}"
 BASE_ARGS=()
 [[ -z "${BASE_IMAGE:-}" ]] || BASE_ARGS+=(--build-arg "BASE_IMAGE=${BASE_IMAGE}")
@@ -58,6 +67,7 @@ DOCKER_BUILDKIT=1 docker build \
   --platform "${PLATFORM}" \
   --build-arg CPU_ARCH="${CPU_ARCH}" \
   --build-arg TARGET_COREX_ARCH="${COREX_ARCH}" \
+  --build-arg "VLLM_ILUVATAR_COMMIT=${VLLM_ILUVATAR_COMMIT}" \
   "${BASE_ARGS[@]}" \
   --ssh "${SSH_ARG}" \
   --build-arg MAX_JOBS="${MAX_JOBS:-$(nproc)}" \

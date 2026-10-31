@@ -113,6 +113,7 @@ RUN set -euo pipefail; U="${COREX_PKG_URL%/}"; \
 #                     gdrapi/ixthunk) used by ixinfer/ixformer/vllm.
 #   * ixdnn / ixccl : cudnn / nccl equivalents linked by ixformer.
 #   * ixshmem / ucx : ixformer comm layer / NIXL transport.
+#   * ixrdma-core   : libibverbs/libmlx5 providers.
 #   * ixattention-backend : CoreX Torch loads libixattnbkd.so.1 at import time.
 # The ixinfer SDK is deliberately NOT installed; libcuinfer.so is compiled from
 # the pinned source in the builder stage and copied into the runtime image.
@@ -121,6 +122,7 @@ RUN set -euo pipefail; U="${COREX_PKG_URL}"; \
     ftp_install "$U" sdk ixdnn               run; \
     ftp_install "$U" sdk ixccl               run; \
     ftp_install "$U" sdk ixshmem             run; \
+    ftp_install "$U" sdk ixrdma-core         run; \
     ftp_install "$U" sdk ucx                 run; \
     ftp_install "$U" sdk ixattention-backend run; \
     ldconfig
@@ -142,7 +144,7 @@ ARG PIP_INDEX_URL
 ENV PIP_INDEX_URL=${PIP_INDEX_URL} COREX_PYTHON_VERSION=${PYTHON_VERSION}
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        build-essential ninja-build openssh-client binutils kmod \
+        build-essential ninja-build openssh-client binutils kmod libibverbs-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Python build helpers and runtime dependencies are installed once, before any

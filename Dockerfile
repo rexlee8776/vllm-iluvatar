@@ -14,8 +14,8 @@ ARG IXINFER_BRANCH=ixinfer
 # lockstep, so the ixinfer stage reads it from there.
 ARG IXINFER_CMAKE_ARGS=
 ARG IXFORMER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/ixformer.git
-ARG IXFORMER_BRANCH=jiaqiu/feat/dsv4_v41_opt
-ARG IXFORMER_COMMIT=3f88393990d4e3a814e7333dcb4a5cfd5e0e5ecf
+ARG IXFORMER_BRANCH=master
+ARG IXFORMER_COMMIT=0553670acf1fd307f098cabbd78fd0b0adf6e147
 ARG VLLM_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/vllm.git
 ARG VLLM_BRANCH=feat/v0.31.0
 ARG VLLM_COMMIT=341bf7d4d1244424c94296ce4fc5626ad14b827a

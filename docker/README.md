@@ -14,7 +14,7 @@ vLLM 在独立阶段构建，不依赖 ixinfer/ixformer 的编译缓存。插件
 在仓库根目录执行，同一份源码、参数分别生成两个 target：
 
 ```bash
-BASE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261023
+BASE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261102
 BUILD_BASE=${BASE}-build
 
 docker build --platform linux/amd64 --network=host --build-arg CPU_ARCH=x86_64 --build-arg COREX_ARCH=ivcore11 -f Dockerfile.base --target runtime-base -t "$BASE" .

@@ -1,0 +1,427 @@
+{
+  "name": "Step-3.5-Flash",
+  "owner": "iluvatar-aiac-llmfp-inference",
+  "slug": "Step-3.5-Flash-iluvatar-compressed-tensors-v0",
+  "url": "http://modelhub.iluvatar.ai/models/Step-3.5-Flash-iluvatar-compressed-tensors-v0",
+  "platform_version": "v3",
+  "revision": "7635d0ec8ee34f2dc0361ebe22e87eeebef1516c12e3dbc4665890acc5b6febd",
+  "storage_relpath": ".snapshots/model/Step-3.5-Flash-iluvatar-compressed-tensors-v0/v3",
+  "config_sha256": "9e8ae7e9bb89c7811c4871d51a989dc7c458398013e8cf6658ac3579388a0bb7",
+  "configuration_source": "http://modelhub.iluvatar.ai/models/Step-3.5-Flash-iluvatar-compressed-tensors-v0?revision=v3",
+  "notes": [
+    "Initial CI preset: configuration inspected, GPU smoke not yet run.",
+    "Text requests only; no vision, benchmark-accuracy or long-duration claim.",
+    "Adapted from published model card: bounded context, sequences and graph capture for smoke.",
+    "Do not execute model-card runtime patch scripts: CI must test the built product wheels unchanged."
+  ],
+  "cache_relpath": "Step-3.5-Flash-iluvatar-compressed-tensors-v0/v3-7635d0ec8ee3",
+  "cache_manifest_sha256": "1441ea6ddfee8e34e10f413e82b68eb302845ad5c28236fd2dd62dad18685ff1",
+  "cache_total_bytes": 107403632572,
+  "cache_files": [
+    {
+      "path": "LICENSE",
+      "size": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSE.code",
+      "size": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "NOTICE.quantization",
+      "size": 475,
+      "sha256": "b2a3c65cb6e116dc63389ef28442f4836ff4ad47fbd49e2df726f31d06d26cb2"
+    },
+    {
+      "path": "README.StepFun-original.md",
+      "size": 26241,
+      "sha256": "6b903e2816900a43ec28d4a8f0f5c2feb72f7c65945cad503375414a270751d2"
+    },
+    {
+      "path": "README.md",
+      "size": 4632,
+      "sha256": "6e5bfc90562f2214b2ba1268bdefab1d30a9d64d131fd66f1a1633bb8af39079"
+    },
+    {
+      "path": "artifact-manifest.json",
+      "size": 12787,
+      "sha256": "fdca425d9809169df15908dc449c2d1d4f9dcabf0d311a9bf1ed43681f01e390"
+    },
+    {
+      "path": "chat_template.jinja",
+      "size": 5004,
+      "sha256": "b18b99dff7261214c43e0402cba9f573e3240be6f9bb7ccaa54bb8df97e49dca"
+    },
+    {
+      "path": "config.json",
+      "size": 6749,
+      "sha256": "9e8ae7e9bb89c7811c4871d51a989dc7c458398013e8cf6658ac3579388a0bb7"
+    },
+    {
+      "path": "configuration.json",
+      "size": 73,
+      "sha256": "f888421726665e8a84b738eed42a64875aed79de8be7daade851ac8bf4c0cef9"
+    },
+    {
+      "path": "configuration_step3p5.py",
+      "size": 2285,
+      "sha256": "3edef21cbc04129f0d63a2a4ca4d012bea553281db525884d23861627768bda3"
+    },
+    {
+      "path": "evaluation-datasets.json",
+      "size": 241,
+      "sha256": "2f1edeb3bc380d5f6214d5eaec6e5aa06354488ddc21831a61a448610b3c60bd"
+    },
+    {
+      "path": "evaluation/configs/gpqa_diamond.json",
+      "size": 897,
+      "sha256": "103c119fb956ee862146cfab34ed2ef9a8d2fc52bff97b32187e0d4ac8284d05"
+    },
+    {
+      "path": "evaluation/fetch_data.py",
+      "size": 1146,
+      "sha256": "0eedc1572b7b998fd14800f5f402013a8fd7fa002462f0f550177a80abadf793"
+    },
+    {
+      "path": "evaluation/requirements.txt",
+      "size": 169,
+      "sha256": "6b69dc1c89c85faa2aa8025663a2076857380b473548824a16bba922905d24f3"
+    },
+    {
+      "path": "evaluation/run.py",
+      "size": 1976,
+      "sha256": "28253d094aead6b44f8734b79f3ebf1d98aa99c0cca6fce97392c27b0ae8881d"
+    },
+    {
+      "path": "evaluation_protocol.json",
+      "size": 21514,
+      "sha256": "aff1e63fe08523dcd82701298fcd8f5aaed27346492abedba92717c7fdc27d2b"
+    },
+    {
+      "path": "evaluation_results.json",
+      "size": 860,
+      "sha256": "b714271c1f7a54b05e108b68b22f16b68f76b34443ef59117ba3fac5e3d45ba3"
+    },
+    {
+      "path": "generation_config.json",
+      "size": 45,
+      "sha256": "791fafb212affdd45ea6435d0a3b662418b12e80754156f092af163fff3cf6d1"
+    },
+    {
+      "path": "meta.json",
+      "size": 547,
+      "sha256": "331855eaf646272f18957f97661eedc87652c28cbb4cf0d4c36101e04e752695"
+    },
+    {
+      "path": "model-00001.safetensors",
+      "size": 5404302320,
+      "sha256": "24e4884d56f13b7503abb4f5da669f93c98d8b6e1e1f14426fca2a5121cd9074"
+    },
+    {
+      "path": "model-00002.safetensors",
+      "size": 6539368280,
+      "sha256": "25a33f7519a3b1eeebbcebe72c0cb07178e91e7436a3e8c59091883c6cf5bc03"
+    },
+    {
+      "path": "model-00003.safetensors",
+      "size": 2272592560,
+      "sha256": "3af23135928e7166d02a1af87416c8821798c3c7db15a646945d8d3bf8e9186f"
+    },
+    {
+      "path": "model-00004.safetensors",
+      "size": 2272592560,
+      "sha256": "67abe5073d89b8eef5ce1bfa8cc137fb6820c2302f1d5697a67a0f000284cd7f"
+    },
+    {
+      "path": "model-00005.safetensors",
+      "size": 2272592560,
+      "sha256": "c1a48615c3fc91057f5e458577a2162046e9a7490535d1811823ac5bd092fb71"
+    },
+    {
+      "path": "model-00006.safetensors",
+      "size": 2272592560,
+      "sha256": "d180976d750e9ec9b135d3141078fc7794af4ff1bc5688f6c39e7810d03dd9a5"
+    },
+    {
+      "path": "model-00007.safetensors",
+      "size": 2272592560,
+      "sha256": "b8da17929bfef195da29d9a11f2aeaffcf0712f676665dde42a7dfa7a2f1369b"
+    },
+    {
+      "path": "model-00008.safetensors",
+      "size": 2272592560,
+      "sha256": "bcf5cb2e33a87f47fcec1658c48155b09c07d45048c2de833b654ca6dff9e50f"
+    },
+    {
+      "path": "model-00009.safetensors",
+      "size": 2272592560,
+      "sha256": "b4fac1fe42f21f9c1a9ab01c61896bab2eb9c152cb833c6267c359f82285a3fe"
+    },
+    {
+      "path": "model-00010.safetensors",
+      "size": 2272592568,
+      "sha256": "178777c0db8bd521f2687f7a74686975e0633ef529e5f15d62850e6925c57e91"
+    },
+    {
+      "path": "model-00011.safetensors",
+      "size": 2272592568,
+      "sha256": "7603568066a9144e4c2fc314baed73c5d01614e275009111e8365dd93307f16c"
+    },
+    {
+      "path": "model-00012.safetensors",
+      "size": 2272592568,
+      "sha256": "b8cafb54d69544f5d78cd65731be308759dcb2b2c13b2c648f6b6b020201be8c"
+    },
+    {
+      "path": "model-00013.safetensors",
+      "size": 2272592568,
+      "sha256": "906ee62ee84711dc566359762840ef42105405045cdde627d24d8825f3a1ed61"
+    },
+    {
+      "path": "model-00014.safetensors",
+      "size": 2272592568,
+      "sha256": "439d72f6031d74d5a6392cab99ad3c4cc448ac06329b9758ed341878083a7074"
+    },
+    {
+      "path": "model-00015.safetensors",
+      "size": 2272592568,
+      "sha256": "e439815381177df3436192f57ef21c73181f7358df25ce34367f98e76007983c"
+    },
+    {
+      "path": "model-00016.safetensors",
+      "size": 2272592568,
+      "sha256": "210b85d3f8626ff86702917793525b8a68f6edcee0d49536a220878eaa7e77df"
+    },
+    {
+      "path": "model-00017.safetensors",
+      "size": 2272592568,
+      "sha256": "800eeda48f372e6dca171cd4ce217849374a1aceb04c3838616c122526f48b6e"
+    },
+    {
+      "path": "model-00018.safetensors",
+      "size": 2272592568,
+      "sha256": "eeb89146bda6f394652b4841ece341aae740d7b69ab59c4d83f94b152af1f41e"
+    },
+    {
+      "path": "model-00019.safetensors",
+      "size": 2272592568,
+      "sha256": "949a306a422ec99a3bad6ba49cee30e83e94514eefef7289087857cf2c6e4872"
+    },
+    {
+      "path": "model-00020.safetensors",
+      "size": 2272592568,
+      "sha256": "feecbfce7a5dc78c68dfca5d40e155a2a6d4c1f59f93f56b21b13359fc31c8ca"
+    },
+    {
+      "path": "model-00021.safetensors",
+      "size": 2272592568,
+      "sha256": "ec5af81f85a1132044f6767b65fe851754a4005b91027f824a4bb0bd0fa22b01"
+    },
+    {
+      "path": "model-00022.safetensors",
+      "size": 2272592568,
+      "sha256": "450ae4a06f9a0bf25bde9f4c457b8f84af56716516df3019c7f4fc9971cc31ae"
+    },
+    {
+      "path": "model-00023.safetensors",
+      "size": 2272592568,
+      "sha256": "2adbc3562aded7d92b83b37c9588bbb9b50fcd2e40fe24bb3fbec922cc8350dc"
+    },
+    {
+      "path": "model-00024.safetensors",
+      "size": 2272592568,
+      "sha256": "02cb30268f2bce5b3543bd27fb2dec0448f1d79a2d480b2fd03f68a198db94de"
+    },
+    {
+      "path": "model-00025.safetensors",
+      "size": 2272592568,
+      "sha256": "ef8fd5b79698169c7924ab6292744c803634165a6d395e5a23920196e626e3b4"
+    },
+    {
+      "path": "model-00026.safetensors",
+      "size": 2272592568,
+      "sha256": "6b3b78efeb9febd3c69b170a4e6d12a2276f1b8bc8fa0a0ecaab93076d2756d8"
+    },
+    {
+      "path": "model-00027.safetensors",
+      "size": 2272592568,
+      "sha256": "7d576678073da7d0bfcac54b72415db9dc939374c3711c6219d1470523d91807"
+    },
+    {
+      "path": "model-00028.safetensors",
+      "size": 2272592568,
+      "sha256": "644d1d477ab322d88f05235fb39603aa560f86ae43a0154e6fc02891a695ab80"
+    },
+    {
+      "path": "model-00029.safetensors",
+      "size": 2272592568,
+      "sha256": "921c09ae9ea640cd20555fd7272814538ab4f3d499110e5aeeb07bad5dd6793c"
+    },
+    {
+      "path": "model-00030.safetensors",
+      "size": 2272592568,
+      "sha256": "222874ccf86fba5ca52584a32d47b3cafef565ce8405463369fda331c4defb29"
+    },
+    {
+      "path": "model-00031.safetensors",
+      "size": 2272592568,
+      "sha256": "826854920b73bc7bea3cd55524fba10357aa7eaec5a5e116935510014903fe5e"
+    },
+    {
+      "path": "model-00032.safetensors",
+      "size": 2272592568,
+      "sha256": "4c23c41f8adaedb1121b293098650fc387955165e812541908c14e2a2756230c"
+    },
+    {
+      "path": "model-00033.safetensors",
+      "size": 2272592568,
+      "sha256": "1266a94aa5481a52e262c56f3670754894df55e6f96d5ea6ac949e23e9419195"
+    },
+    {
+      "path": "model-00034.safetensors",
+      "size": 2272592568,
+      "sha256": "0ba9d26c2c8506e3fab49ba634e7bee803e303787f26cc1271cf5244a3f8cb89"
+    },
+    {
+      "path": "model-00035.safetensors",
+      "size": 2272592568,
+      "sha256": "78fb113941d5ed74eb4bce8f9b7086183cb63e9e51e0f1a99265331954d9ca83"
+    },
+    {
+      "path": "model-00036.safetensors",
+      "size": 2272592568,
+      "sha256": "20275dd26dc179e9d0a635dedcec96277a6d25883eb558d1757e2dc8f5161cfd"
+    },
+    {
+      "path": "model-00037.safetensors",
+      "size": 2272592568,
+      "sha256": "f7eaf18936efb8070d3bcc99123cb5c5629a72d2f9f93e9fafb357969abc77bd"
+    },
+    {
+      "path": "model-00038.safetensors",
+      "size": 2272592568,
+      "sha256": "1bf51bb124ffd155f3372d99000174e05ff1e41ab41ffac00918f008aef4edd8"
+    },
+    {
+      "path": "model-00039.safetensors",
+      "size": 2272592568,
+      "sha256": "7c44faf20e8c25df2fff66ff1fd2337d54c1f68193c1e2295ad8303c45f19004"
+    },
+    {
+      "path": "model-00040.safetensors",
+      "size": 2272592568,
+      "sha256": "f32188ed0fc1cc82c8bf979835e7a9c962ce852764baed4b11bb9c8e528953f8"
+    },
+    {
+      "path": "model-00041.safetensors",
+      "size": 2272592568,
+      "sha256": "9317c1603bcca75b179883912fa86b7399568afb71403485165bca257f8f43d3"
+    },
+    {
+      "path": "model-00042.safetensors",
+      "size": 2272592568,
+      "sha256": "3872b859621ac9b22429f8ce874f0ac6360b6a64fea6c70ddc44d16d5f869f84"
+    },
+    {
+      "path": "model-00043.safetensors",
+      "size": 2272592568,
+      "sha256": "6b83ed10ac992b04b190317424770fc7a1e8aab01183f9616cfe149758ec3d39"
+    },
+    {
+      "path": "model-00044.safetensors",
+      "size": 2272592568,
+      "sha256": "b2fe0a1a1f2b8ba2a6d124133a1e6722ea300c6455baf0c15073f883ff71c480"
+    },
+    {
+      "path": "model.safetensors.index.json",
+      "size": 96162,
+      "sha256": "af4d72747758f0dbcd183c0c6ffa4fc864bbb3e91380cf6af36c9c0ccd4b2312"
+    },
+    {
+      "path": "modeling_step3p5.py",
+      "size": 38567,
+      "sha256": "b17c4483f30b4f67c8ac0194aaa652ce7a9e6b8efd9ffe08445de4e9be538f87"
+    },
+    {
+      "path": "quantization-validation.json",
+      "size": 231,
+      "sha256": "f5ea78cff2755224f67381e403620b6aa72866009380fe77f0a8b6b2be6322d3"
+    },
+    {
+      "path": "quantization/configs.json",
+      "size": 2483,
+      "sha256": "484fb2c0a252e102aec77957293eb3654d241e762509703d97fac5190e3f44c5"
+    },
+    {
+      "path": "quantization/rules.json",
+      "size": 4136,
+      "sha256": "cbceb5b66bb41b2777814eb54a1395e652fc3111b66e0a484e397a05462aaee0"
+    },
+    {
+      "path": "quantization_provenance.json",
+      "size": 1034,
+      "sha256": "8fdde49abe369a4a81f935113364cf40299c5d2136a648509eb880f656e856ce"
+    },
+    {
+      "path": "runtime/apply_backend_compatibility.py",
+      "size": 1106,
+      "sha256": "e71d264797b7ac796f86a6109dcae222099ffbabf4d676219b39383cb3ae068a"
+    },
+    {
+      "path": "runtime/backend-api-compatibility.json",
+      "size": 591,
+      "sha256": "d832be38aa754a63d2d94755728a166c7371aeec2606a2938632c59d7a23a5be"
+    },
+    {
+      "path": "runtime/backend-api-validation.json",
+      "size": 119,
+      "sha256": "273267986dc3b257605e344511cca0450ce4d38c0ea81a36fa11e27017dda3a5"
+    },
+    {
+      "path": "source-checksums.json",
+      "size": 7503,
+      "sha256": "0f39ab8cc136d44c8cbe9fdfb32fa1e1e4b6868d4ea02c44d75bf20de4481d4e"
+    },
+    {
+      "path": "source-license-record.json",
+      "size": 201,
+      "sha256": "9052df266153b16f19784455e5f70b330c4fd4a021ae0fe78b2d72b0cd39b4ee"
+    },
+    {
+      "path": "special_tokens_map.json",
+      "size": 468,
+      "sha256": "d47424bda11df4cedc3f9458915c465a28e601d3b7df0e78f6dff4d7727006c4"
+    },
+    {
+      "path": "step-bar-chart.png",
+      "size": 647158,
+      "sha256": "3fa283dc9c139edc3331aaafa21d69de212a241f03262f09acf96fbc0123a93d"
+    },
+    {
+      "path": "stepfun.svg",
+      "size": 674,
+      "sha256": "d7a372e84bab7c028fa98f649937103d482bf7464a4fe583ffeb014c62418239"
+    },
+    {
+      "path": "tokenizer.json",
+      "size": 9976972,
+      "sha256": "b564c620eb77fa11d0926011c2202347d6cfc358d79724ee04ae7007e13636f0"
+    },
+    {
+      "path": "tokenizer_config.json",
+      "size": 163405,
+      "sha256": "78202af487f4d4360e8d15cb0506d60718f8599770599c6f28f7f1fa045a591f"
+    },
+    {
+      "path": "uniform-budget-verification.json",
+      "size": 18228,
+      "sha256": "413ec47004e4e521b915970bccee852e8024404f349f3d024ab13612444e9868"
+    },
+    {
+      "path": "weights-sha256.json",
+      "size": 6779,
+      "sha256": "0a73e63fc46271db5b755165df9e8ab627845bebf49285f29c7e434759302351"
+    }
+  ]
+}

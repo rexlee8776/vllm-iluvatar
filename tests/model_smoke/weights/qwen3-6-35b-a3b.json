@@ -1,0 +1,316 @@
+{
+  "name": "Qwen3.6-35B-A3B",
+  "owner": "iluvatar-aiac-llmfp-inference",
+  "slug": "Qwen3.6-35B-A3B-iluvatar-compressed-tensors-v0",
+  "url": "http://modelhub.iluvatar.ai/models/Qwen3.6-35B-A3B-iluvatar-compressed-tensors-v0",
+  "platform_version": "v4",
+  "revision": "8b94566f1e6be1e01832d5adbe92044b6874f1fb3dedbf165db09afc48ab0e33",
+  "storage_relpath": ".snapshots/model/Qwen3.6-35B-A3B-iluvatar-compressed-tensors-v0/v4",
+  "config_sha256": "304ef5b814692f0e112ae2e64e67a472e33821094497366fc9d598012d6f4979",
+  "configuration_source": "http://modelhub.iluvatar.ai/models/Qwen3.6-35B-A3B-iluvatar-compressed-tensors-v0?revision=v4",
+  "notes": [
+    "Initial CI preset: configuration inspected, GPU smoke not yet run.",
+    "Text requests only; no vision, benchmark-accuracy or long-duration claim.",
+    "Adapted from published model card: bounded context, sequences and graph capture for smoke."
+  ],
+  "cache_relpath": "Qwen3.6-35B-A3B-iluvatar-compressed-tensors-v0/v4-8b94566f1e6b",
+  "cache_manifest_sha256": "89a42305f13bcea8b95fcc2df1f3bd486991df952ee600d9cb1cae2da712eae0",
+  "cache_total_bytes": 25588077925,
+  "cache_files": [
+    {
+      "path": "LICENSE",
+      "size": 11343,
+      "sha256": "50cbab8a892c5f2993b8c7351a99182507472def3b1374558308605d99b86b32"
+    },
+    {
+      "path": "LICENSE.code",
+      "size": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "NOTICE.quantization",
+      "size": 476,
+      "sha256": "ffbf350c1c8456a3c9f9b0c75d672364257aae21d35c1cc018ff7d70852d61e5"
+    },
+    {
+      "path": "README.Qwen-original.md",
+      "size": 64550,
+      "sha256": "c4ddaa065649ff6352648f64747a16eda31726f3e34add94ce04abb461c77b75"
+    },
+    {
+      "path": "README.md",
+      "size": 4372,
+      "sha256": "db82a301ba5c629a50a855b44078670849c1fb59720666def2b560c117455ff4"
+    },
+    {
+      "path": "artifact-manifest.json",
+      "size": 9416,
+      "sha256": "44648dde57d296c6061ac7450861d4b057c8590a197defe4efd89b4309a02e1c"
+    },
+    {
+      "path": "chat_template.jinja",
+      "size": 7764,
+      "sha256": "e84f32a23fdda27689f868aa4a1a5621f41133e51a48d7f3efcbea2839574259"
+    },
+    {
+      "path": "config.json",
+      "size": 4937,
+      "sha256": "304ef5b814692f0e112ae2e64e67a472e33821094497366fc9d598012d6f4979"
+    },
+    {
+      "path": "configuration.json",
+      "size": 58,
+      "sha256": "c1b09db419119513247e9b8b912c4b9897106c9b20c6cada7e107d993c5435eb"
+    },
+    {
+      "path": "evaluation-datasets.json",
+      "size": 241,
+      "sha256": "2f1edeb3bc380d5f6214d5eaec6e5aa06354488ddc21831a61a448610b3c60bd"
+    },
+    {
+      "path": "evaluation/configs/gpqa_diamond.json",
+      "size": 994,
+      "sha256": "87483151282272c9a5fc372147867f2b62fc01e06cfdb96ea88573e3eeabc0d8"
+    },
+    {
+      "path": "evaluation/fetch_data.py",
+      "size": 1146,
+      "sha256": "0eedc1572b7b998fd14800f5f402013a8fd7fa002462f0f550177a80abadf793"
+    },
+    {
+      "path": "evaluation/requirements.txt",
+      "size": 169,
+      "sha256": "6b69dc1c89c85faa2aa8025663a2076857380b473548824a16bba922905d24f3"
+    },
+    {
+      "path": "evaluation/run.py",
+      "size": 1976,
+      "sha256": "28253d094aead6b44f8734b79f3ebf1d98aa99c0cca6fce97392c27b0ae8881d"
+    },
+    {
+      "path": "evaluation_protocol.json",
+      "size": 849,
+      "sha256": "249ebfe13afbe70e393db06b9af9b7272f2bb13cca891dbc421812e18556c74b"
+    },
+    {
+      "path": "evaluation_results.json",
+      "size": 572,
+      "sha256": "7b22cf0c3a4b58088e42a80cdd9cf31c5598ae3be14763d510301a5ebebed693"
+    },
+    {
+      "path": "generation_config.json",
+      "size": 202,
+      "sha256": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e"
+    },
+    {
+      "path": "merges.txt",
+      "size": 3353259,
+      "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d"
+    },
+    {
+      "path": "meta.json",
+      "size": 547,
+      "sha256": "677776ac7c1ef7760a3fce851b9ea0a0fa99ca6f8e5b5c5d947d23cfd0fbcf42"
+    },
+    {
+      "path": "model-00001-of-00026.safetensors",
+      "size": 1987128448,
+      "sha256": "f660b7a80a0f938fa40c7cae9a903efa69948ec6a8f3eb700cd9a4f5060afcca"
+    },
+    {
+      "path": "model-00002-of-00026.safetensors",
+      "size": 884351376,
+      "sha256": "73c46c6cb77f8f96ff0309d95a364329e31436aaefdb76152d27c1761347e599"
+    },
+    {
+      "path": "model-00003-of-00026.safetensors",
+      "size": 921053728,
+      "sha256": "ba8fd259e56da2f4dd736c65d58915e99cf6b81f7affdca51e8af07f2a397f50"
+    },
+    {
+      "path": "model-00004-of-00026.safetensors",
+      "size": 961181504,
+      "sha256": "ea612c7a9a9754d99738f456cde077886872660e9b89c1ceb8305ddbfce6c036"
+    },
+    {
+      "path": "model-00005-of-00026.safetensors",
+      "size": 921053728,
+      "sha256": "a910204e0b3f67cc45bfc47982d9bb904a4cdbfe249368320002d31db568026c"
+    },
+    {
+      "path": "model-00005-of-00026.safetensors.part",
+      "size": 3357898360,
+      "sha256": "d2b0e4f4dfbcb999e6dc8b7deee1c6b8b363802d1183886bb5114a391d8b77a5"
+    },
+    {
+      "path": "model-00005-of-00026.safetensors.part.chunks.json",
+      "size": 73,
+      "sha256": "51f0377c31d7d7ce982affae2ebe5ea0c2eaa4edb444884e976a6fba618deb98"
+    },
+    {
+      "path": "model-00006-of-00026.safetensors",
+      "size": 1149241824,
+      "sha256": "108b5f7178c499c7749d695f06f73c4b6fdcf0712d81d3cf2600ee60aa28d669"
+    },
+    {
+      "path": "model-00007-of-00026.safetensors",
+      "size": 292530408,
+      "sha256": "6e20b369ef2810435245a9a883fed798de6e4f1ffc4d15ad4b03972a3860c77f"
+    },
+    {
+      "path": "model-00008-of-00026.safetensors",
+      "size": 1106295640,
+      "sha256": "d0495de4c1d8f41f4a20e23c552055f7a78eaba2071d9588c10c814f163eb066"
+    },
+    {
+      "path": "model-00009-of-00026.safetensors",
+      "size": 295348904,
+      "sha256": "66ed4c6b4c9cb86fbabc311f84e54095ae046c97224eb66f7f803d90eecee0b7"
+    },
+    {
+      "path": "model-00010-of-00026.safetensors",
+      "size": 1106295640,
+      "sha256": "7f390aa8cdc522dd38a1d2c6225b606cea1d7ad47743fdbeca01a142ff49f0c1"
+    },
+    {
+      "path": "model-00011-of-00026.safetensors",
+      "size": 295348896,
+      "sha256": "7c18cc3cb25df0049050b341f1a65f19d76d95e08a77abbd9daf16b8e26662d1"
+    },
+    {
+      "path": "model-00012-of-00026.safetensors",
+      "size": 973126488,
+      "sha256": "c907a96bf93a91be75fa2fdf49d0816e5a2da72572156d133eadb4ead84c1bcc"
+    },
+    {
+      "path": "model-00013-of-00026.safetensors",
+      "size": 428518048,
+      "sha256": "477fe0f281681f11b0ec70c0c20033f407390d65b21f3d7ce75ff8ca6f8afc3a"
+    },
+    {
+      "path": "model-00014-of-00026.safetensors",
+      "size": 1012926696,
+      "sha256": "78d22715b5202e1000fd2fc9a04b87ffe6382cacd525ae1d1f31bf024e48305b"
+    },
+    {
+      "path": "model-00015-of-00026.safetensors",
+      "size": 428845592,
+      "sha256": "3c135fba570193293a49a20c7b70f7617b693c8b3168338e1ffc6188358528a3"
+    },
+    {
+      "path": "model-00016-of-00026.safetensors",
+      "size": 1109441624,
+      "sha256": "7e764b3c3484f3a91a5768025664fa3032b549cce3760359e35e632e8fbfa389"
+    },
+    {
+      "path": "model-00017-of-00026.safetensors",
+      "size": 292202896,
+      "sha256": "0da68e05ce8c71a04cb5ddbf2f57ca3928e18436fc10c731342c2510f0ba343e"
+    },
+    {
+      "path": "model-00018-of-00026.safetensors",
+      "size": 1106295640,
+      "sha256": "38cf573dff88d9aa3ac8dc3d3873ff03a8726d676755a37b46813ac0b14c3be1"
+    },
+    {
+      "path": "model-00019-of-00026.safetensors",
+      "size": 295348896,
+      "sha256": "fc281e0877fe148efc7b50fdca7dd5b9975654a3934deedfc23bd6342f20e9d4"
+    },
+    {
+      "path": "model-00020-of-00026.safetensors",
+      "size": 973126488,
+      "sha256": "05c6d06aac459716b5b00c956a39bdd0cab2344a6629caa846f7bbc02bff599d"
+    },
+    {
+      "path": "model-00021-of-00026.safetensors",
+      "size": 428518048,
+      "sha256": "2d38f039500371c77edc4f6ebc8d0375009f30c69d653aed943f18c5ad11bd40"
+    },
+    {
+      "path": "model-00022-of-00026.safetensors",
+      "size": 961181544,
+      "sha256": "dd1a1c8c3cde1098b7061161a2fe38bd4aa1441d11b2c91339915a1fba4ae268"
+    },
+    {
+      "path": "model-00023-of-00026.safetensors",
+      "size": 921053768,
+      "sha256": "74f7ab5ecf6a3158cd1277c6db0eed448805dd673f8c2c7b4c19fb41f39f0a44"
+    },
+    {
+      "path": "model-00024-of-00026.safetensors",
+      "size": 961181544,
+      "sha256": "5688089c6b358e6f293a134edd16b51872cd02a88b1b3e63e36397007532452f"
+    },
+    {
+      "path": "model-00025-of-00026.safetensors",
+      "size": 1019559320,
+      "sha256": "9660c7b4a4aeb5f3868565cf6206398b887647cd7906c333fc0bf047f8083571"
+    },
+    {
+      "path": "model-00026-of-00026.safetensors",
+      "size": 1375870088,
+      "sha256": "0feb361990b6d786dfbd8e831166ac89dcd34a90d414b9edb58477086b663bb7"
+    },
+    {
+      "path": "model.safetensors.index.json",
+      "size": 111307,
+      "sha256": "a8f9a9f361068db6646015fba48359009ae024019c2de40a0a4c6003447aa219"
+    },
+    {
+      "path": "preprocessor_config.json",
+      "size": 390,
+      "sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516"
+    },
+    {
+      "path": "quantization-validation.json",
+      "size": 230,
+      "sha256": "6b83f65c2a2e5fbc6ba58b126c325b7e807ebf45b3d1f943992d6b89d5b402a9"
+    },
+    {
+      "path": "quantization/configs.json",
+      "size": 2708,
+      "sha256": "f49806c9c91d925e7f4736ac069f5a69c7883fd3b2e29bf7d7d4c5b09c2ccc3b"
+    },
+    {
+      "path": "quantization/rules.json",
+      "size": 4983,
+      "sha256": "4fb366f3b3ba30aeb1c11698ccf5948d11a7f8dfa96bb28764f84f61f1a12e0a"
+    },
+    {
+      "path": "quantization_provenance.json",
+      "size": 1065,
+      "sha256": "c0e40d63c21981957d7459540aaa429e972421ff2737dfd502f7dc063992c0e4"
+    },
+    {
+      "path": "source-checksums.json",
+      "size": 5737,
+      "sha256": "b751356e05b07e109b054683bf35a3f156b79d970041402d943cfad86de8aded"
+    },
+    {
+      "path": "tokenizer.json",
+      "size": 12807982,
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+    },
+    {
+      "path": "tokenizer_config.json",
+      "size": 16718,
+      "sha256": "5186f0defcd7f232382c7f0aebcd2252d073bb921ab240e407b7ae8745d2b29b"
+    },
+    {
+      "path": "video_preprocessor_config.json",
+      "size": 385,
+      "sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
+    },
+    {
+      "path": "vocab.json",
+      "size": 6722759,
+      "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+    },
+    {
+      "path": "weights-sha256.json",
+      "size": 4224,
+      "sha256": "49ea06c9c522a02c3908a82a283e59e01e64a8e6461c0920abbf3f0e36da65f5"
+    }
+  ]
+}

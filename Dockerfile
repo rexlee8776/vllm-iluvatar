@@ -1,7 +1,7 @@
 # Source-only build: ixinfer, ixformer, deep_ep, vLLM, vllm-iluvatar, nixl, dynamo, vllm-router.
 # Build Dockerfile.base first; see docker/README.md. No SDK/PyPI downloads here.
-ARG BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261102
-ARG BUILD_BASE_IMAGE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261102-build
+ARG BASE_IMAGE=10.150.9.98:80/aiac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261102
+ARG BUILD_BASE_IMAGE=10.150.9.98:80/aiac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261102-build
 # Optional expectations: actual GPU compilation target is inherited from base.
 # Keep separate names so an ARG cannot disguise an incompatible base ENV.
 ARG CPU_ARCH

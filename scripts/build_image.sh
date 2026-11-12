@@ -10,7 +10,7 @@
 #
 # The image is tagged for the Harbor registry with a CPU-arch + GPU-arch + build-date suffix:
 #   <REGISTRY>/<PROJECT>/<NAME>:<BASE_TAG>-<CPU_ARCH>-<COREX_ARCH>-<BUILD_DATE>
-# e.g. 10.150.9.98:80/aac-llmfp/vllm-iluvatar-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261028
+# e.g. 10.150.9.98:80/aiac-llmfp/vllm-iluvatar-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261028
 # CPU_ARCH defaults to uname -m; ARCH remains a compatibility alias.
 # GPU selection requires matching runtime/build bases; renaming a tag is not
 # sufficient. The vLLM version remains in the repository name.
@@ -20,7 +20,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
 REGISTRY="${REGISTRY:-10.150.9.98:80}"
-PROJECT="${PROJECT:-aac-llmfp}"
+PROJECT="${PROJECT:-aiac-llmfp}"
 NAME="${NAME:-vllm-iluvatar-0.31.0}"
 BASE_TAG="${BASE_TAG:-corex5.0.1-ubuntu24.04-python3.12}"
 CPU_ARCH="${CPU_ARCH:-${ARCH:-$(uname -m)}}"

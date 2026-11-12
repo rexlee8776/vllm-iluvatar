@@ -14,7 +14,7 @@ vLLM 在独立阶段构建，不依赖 ixinfer/ixformer 的编译缓存。插件
 在仓库根目录执行，同一份源码、参数分别生成两个 target：
 
 ```bash
-BASE=10.150.9.98:80/aac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261102
+BASE=10.150.9.98:80/aiac-llmfp/vllm-iluvatar-base-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261102
 BUILD_BASE=${BASE}-build
 
 docker build --platform linux/amd64 --network=host --build-arg CPU_ARCH=x86_64 --build-arg COREX_ARCH=ivcore11 -f Dockerfile.base --target runtime-base -t "$BASE" .
@@ -37,7 +37,7 @@ docker build --platform linux/amd64 --network=host --ssh default \
   --build-arg BUILD_BASE_IMAGE="$BUILD_BASE" \
   --build-arg VLLM_ILUVATAR_COMMIT="$(git rev-parse HEAD)" \
   --build-arg MAX_JOBS=64 \
-  -t 10.150.9.98:80/aac-llmfp/vllm-iluvatar-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261023 .
+  -t 10.150.9.98:80/aiac-llmfp/vllm-iluvatar-0.31.0:corex5.0.1-ubuntu24.04-python3.12-x86_64-ivcore11-20261023 .
 ```
 
 通过 `IXFORMER_COMMIT`、`VLLM_COMMIT`、`NIXL_COMMIT`、`DYNAMO_COMMIT`、`VLLM_ROUTER_COMMIT` 覆盖外部源码版本；ixinfer commit 自动读取 ixformer 的 gitlink，不单独覆盖。分支参数分别为 `IXINFER_BRANCH`、`IXFORMER_BRANCH`、`VLLM_BRANCH`、`NIXL_BRANCH`、`DYNAMO_BRANCH`、`VLLM_ROUTER_BRANCH`。ixinfer 必须与指定 ixformer 的 `third_party/ixinfer` gitlink 一致，否则构建失败。vLLM 使用 `build_vllm.sh`，不构建可选 Rust frontend；插件使用 `build_vllm_iluvatar.sh`，其余组件使用各自仓库的构建脚本。
@@ -64,7 +64,7 @@ iluvatar-build-info
 
 base 不包含这些源码产物，其基础环境清单位于 `/opt/iluvatar-base/manifest.json`。同一标签不能跨 GPU 架构复用；本标签对应 ivcore11，其他架构应替换对应架构字段并独立验证。
 
-镜像标签统一采用 `corex<CoreX版本>-ubuntu<Ubuntu版本>-python<Python版本>-<CPU架构>-<GPU架构>-<YYYYMMDD>`，日期为北京时间实际发布日。业务镜像仓库为 `aac-llmfp/vllm-iluvatar-0.31.0`；base 为 `aac-llmfp/vllm-iluvatar-base-0.31.0`，编译 base 在完整标签末尾加 `-build`。base 仓库名中的 vLLM 版本表示配套的环境版本，不代表 base 内已安装 vLLM。
+镜像标签统一采用 `corex<CoreX版本>-ubuntu<Ubuntu版本>-python<Python版本>-<CPU架构>-<GPU架构>-<YYYYMMDD>`，日期为北京时间实际发布日。业务镜像仓库为 `aiac-llmfp/vllm-iluvatar-0.31.0`；base 为 `aiac-llmfp/vllm-iluvatar-base-0.31.0`，编译 base 在完整标签末尾加 `-build`。base 仓库名中的 vLLM 版本表示配套的环境版本，不代表 base 内已安装 vLLM。
 
 ## CPU / GPU 架构选择
 

@@ -4,8 +4,8 @@ from copy import deepcopy
 from types import SimpleNamespace as NS
 
 import pytest
-from tests.v1.worker.prefill_state.test_lifecycle import config
 
+from tests.v1.worker.prefill_state.test_lifecycle import config
 from vllm_iluvatar.v1.worker.prefill_state.configuration import (
     SESSION_KEY,
     enabled,

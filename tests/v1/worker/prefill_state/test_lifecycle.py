@@ -487,13 +487,11 @@ def test_proxy_connector_deduplicates_keepalive_retry_logs(monkeypatch):
     assert errors == []
     assert len(warnings) == 3
     assert (
-        "Cannot connect to: 10.112.22.37:18858(use PORT+1 to keep alive)"
-        in warnings[0]
+        "Cannot connect to: 10.112.22.37:18858(use PORT+1 to keep alive)" in warnings[0]
     )
     assert "Proxy keepalive connection to 10.112.22.37:18858 closed" in warnings[1]
     assert (
-        "Cannot connect to: 10.112.22.37:18858(use PORT+1 to keep alive)"
-        in warnings[2]
+        "Cannot connect to: 10.112.22.37:18858(use PORT+1 to keep alive)" in warnings[2]
     )
     assert infos == [
         "Connected to proxy keepalive 10.112.22.37:18858 after 4 retry attempt(s)",

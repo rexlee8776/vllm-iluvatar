@@ -71,12 +71,14 @@ class BuildInfoSourceTests(unittest.TestCase):
                     del environment["IXFORMER_COMMIT"]
                 else:
                     environment["IXFORMER_COMMIT"] = value
-                with tempfile.TemporaryDirectory() as folder:
-                    with contextlib.redirect_stderr(io.StringIO()) as errors:
-                        with self.assertRaises(SystemExit) as failure:
-                            self.write_manifest(Path(folder), environment)
-                    self.assertEqual(failure.exception.code, 2)
-                    self.assertIn("IXFORMER_COMMIT", errors.getvalue())
+                with (
+                    tempfile.TemporaryDirectory() as folder,
+                    contextlib.redirect_stderr(io.StringIO()) as errors,
+                    self.assertRaises(SystemExit) as failure,
+                ):
+                    self.write_manifest(Path(folder), environment)
+                self.assertEqual(failure.exception.code, 2)
+                self.assertIn("IXFORMER_COMMIT", errors.getvalue())
 
 
 if __name__ == "__main__":

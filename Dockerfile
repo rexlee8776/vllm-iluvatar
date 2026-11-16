@@ -15,11 +15,13 @@ ARG IXINFER_BRANCH=ixinfer
 ARG IXINFER_CMAKE_ARGS=
 ARG IXFORMER_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/ixformer.git
 ARG IXFORMER_BRANCH=master
-ARG IXFORMER_COMMIT=7612a667d1f4a61a678c528a20cfcd11ccba8242
+ARG IXFORMER_COMMIT=abbd5d96f67a78bd62b4a02d1c22579ae36c05a9
 ARG VLLM_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swapp/vllm.git
 ARG VLLM_BRANCH=feat/v0.31.0
 ARG VLLM_COMMIT=341bf7d4d1244424c94296ce4fc5626ad14b827a
 ARG VLLM_SCM_VERSION=0.31.0
+# nanobind v2.9.2: source-only build helper for the isolated FlyDSL stage.
+ARG NANOBIND_COMMIT=116e098cfa96effca2a54e32e0ce5b93abe25393
 ARG DEEPEP_REPO=ssh://git@bitbucket.iluvatar.ai:7999/swfw/deepep.git
 ARG DEEPEP_BRANCH=release/5.0
 ARG DEEPEP_COMMIT=73513f015f7cd5c8fbe181a8840c092ec1522766
@@ -54,7 +56,7 @@ ARG IXINFER_CMAKE_ARGS
 ARG IXFORMER_REPO
 ARG IXFORMER_BRANCH
 ARG IXFORMER_COMMIT
-RUN --mount=type=ssh \
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
     && git clone --filter=blob:none --no-checkout \
@@ -95,7 +97,7 @@ FROM ixinfer-builder AS ixformer-builder
 ARG IXFORMER_REPO
 ARG IXFORMER_BRANCH
 ARG IXFORMER_COMMIT
-RUN --mount=type=ssh \
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
     && git clone --branch "${IXFORMER_BRANCH}" "${IXFORMER_REPO}" ixformer \
@@ -117,7 +119,7 @@ FROM ${BUILD_BASE_IMAGE} AS deepep-builder
 ARG DEEPEP_REPO
 ARG DEEPEP_BRANCH
 ARG DEEPEP_COMMIT
-RUN --mount=type=ssh \
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
     && git clone --branch "${DEEPEP_BRANCH}" "${DEEPEP_REPO}" deepep \
@@ -151,7 +153,7 @@ ARG VLLM_REPO
 ARG VLLM_BRANCH
 ARG VLLM_COMMIT
 ARG VLLM_SCM_VERSION
-RUN --mount=type=ssh \
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
     && git clone --branch "${VLLM_BRANCH}" "${VLLM_REPO}" vllm \
@@ -217,7 +219,7 @@ RUN apt-get update -y \
 ARG NIXL_REPO
 ARG NIXL_BRANCH
 ARG NIXL_COMMIT
-RUN --mount=type=ssh \
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
     && git clone --branch "${NIXL_BRANCH}" "${NIXL_REPO}" nixl \
@@ -243,7 +245,7 @@ ARG DYNAMO_REPO
 ARG DYNAMO_BRANCH
 ARG DYNAMO_COMMIT
 ARG DYNAMO_RUNTIME_FEATURES=media-ffmpeg,kv-indexer,kv-indexer-metrics,mm-routing,nvtx
-RUN --mount=type=ssh \
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
     && git clone --branch "${DYNAMO_BRANCH}" "${DYNAMO_REPO}" dynamo \
@@ -280,7 +282,7 @@ RUN apt-get update -y \
 RUN mkdir -p "${CARGO_HOME:-${HOME}/.cargo}" \
     && printf '[source.crates-io]\nreplace-with = "rsproxy"\n\n[source.rsproxy]\nregistry = "sparse+https://rsproxy.cn/index/"\n' \
          >> "${CARGO_HOME:-${HOME}/.cargo}/config.toml"
-RUN --mount=type=ssh \
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
     mkdir -p -m 0700 ~/.ssh \
     && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
     && git clone --branch "${VLLM_ROUTER_BRANCH}" "${VLLM_ROUTER_REPO}" vllm-router \
@@ -292,6 +294,41 @@ RUN --mount=type=ssh \
     && mkdir -p /router-dist \
     && install -m 0755 target/release/vllm-router /router-dist/vllm-router \
     && /router-dist/vllm-router --help > /dev/null
+
+
+# FlyDSL uses its own pinned ixcc/MLIR; never replace the CoreX compiler.
+# Source builds use the existing base dependencies and never resolve PyPI.
+FROM ${BUILD_BASE_IMAGE} AS flydsl-builder
+ARG IXFORMER_REPO
+ARG IXFORMER_BRANCH
+ARG IXFORMER_COMMIT
+ARG NANOBIND_COMMIT
+ARG MAX_JOBS
+ENV PIP_NO_INDEX=1 UV_OFFLINE=1
+WORKDIR /build
+COPY docker/prepare-flydsl.py /build/prepare-flydsl.py
+RUN --mount=type=ssh --mount=type=secret,id=gitconfig,target=/root/.gitconfig \
+    mkdir -p -m 0700 ~/.ssh \
+    && ssh-keyscan -p 7999 bitbucket.iluvatar.ai >> ~/.ssh/known_hosts 2>/dev/null \
+    && git init ixformer-pin \
+    && git -C ixformer-pin remote add origin "${IXFORMER_REPO}" \
+    && git -C ixformer-pin fetch --depth=1 origin "${IXFORMER_COMMIT}" \
+    && git -C ixformer-pin checkout --detach "${IXFORMER_COMMIT}" \
+    && python3 /build/prepare-flydsl.py \
+    && git init nanobind \
+    && git -C nanobind remote add origin https://github.com/wjakob/nanobind.git \
+    && git -C nanobind fetch --depth=1 origin "${NANOBIND_COMMIT}" \
+    && git -C nanobind checkout --detach "${NANOBIND_COMMIT}" \
+    && git -C nanobind submodule update --init --recursive
+# Keep the expensive compiler layer independent from wheel packaging.
+COPY docker/build-flydsl-toolchain.sh /build/build-flydsl-toolchain.sh
+RUN bash /build/build-flydsl-toolchain.sh
+# FlyDSL's CopyFlyPythonSources target patches the embedded MLIR libraries.
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends patchelf \
+    && rm -rf /var/lib/apt/lists/*
+COPY docker/build-flydsl.sh /build/build-flydsl.sh
+RUN bash /build/build-flydsl.sh
 
 
 FROM ${BASE_IMAGE} AS runtime
@@ -319,6 +356,18 @@ COPY --from=ixinfer-builder /usr/local/corex/include/ixinfer.h /usr/local/corex/
 # The revision file ships beside the libraries; keep it out of the library dir.
 RUN mv /usr/local/corex/lib64/ixinfer-revision.txt /etc/iluvatar-ixinfer-revision \
     && test -s /usr/local/corex/include/ixinfer.h && ldconfig
+# CoreX toolkit and its compiler are inherited from BASE_IMAGE (Dockerfile.base).
+# Copy the complete FlyDSL JIT toolchain; the Python wheel alone is insufficient.
+COPY --from=flydsl-builder /opt/flydsl/ixcc/ /opt/flydsl/ixcc/
+COPY --from=flydsl-builder /flydsl-dist/wheels/ /tmp/wheels/
+COPY --from=flydsl-builder /flydsl-dist/build-info.json /etc/iluvatar-flydsl-build-info.json
+COPY --from=flydsl-builder /flydsl-dist/licenses/ /opt/flydsl/licenses/
+ENV IXA_ROOT=/usr/local/corex \
+    ARCH=${COREX_ARCH} \
+    FLYDSL_COMPILE_BACKEND=iluvatar \
+    FLYDSL_RUNTIME_KIND=iluvatar \
+    MLIR_PATH=/opt/flydsl/ixcc \
+    FLYDSL_COMPILE_IXCC_DIR=/opt/flydsl/ixcc
 COPY --from=plugin-builder /wheels/ /tmp/wheels/
 COPY --from=nixl-builder /nixl-dist/*.whl /tmp/wheels/
 COPY --from=dynamo-builder /dynamo-dist/*.whl /tmp/wheels/

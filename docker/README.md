@@ -75,3 +75,25 @@ CPU_ARCH 参与默认 SDK 下载路径；切换 CPU/GPU 时必须核对 COREX_PK
 成品构建通过 BASE_IMAGE / BUILD_BASE_IMAGE 选取配套环境，从 base 继承 COREX_ARCH/CUDA_ARCH。CPU_ARCH 与 TARGET_COREX_ARCH 是独立的期望值：任一 base 与期望值不一致即提前失败，避免参数覆盖掩盖错误架构。现有 manifest 匹配继续检查 runtime/build base 环境一致性。
 
 脚本用法：`CPU_ARCH=x86_64 COREX_ARCH=ivcore11 bash scripts/build_image.sh`。非默认架构还必须显式设置已验证的 BASE_IMAGE 和 BUILD_BASE_IMAGE；脚本传入对应 --platform 和架构期望参数。ARCH 仍作为 CPU_ARCH 的兼容别名。日期按北京时间生成，顺序固定为 CPU → GPU → 日期，build base 在日期后追加 -build。
+
+## FlyDSL 与 CoreX 工具链
+
+当前 ivcore11 成品镜像同时包含两套工具链。CoreX SDK 及其编译器由
+`Dockerfile.base` 安装，供现有原生算子和 Triton 使用；`Dockerfile` 的独立
+`flydsl-builder` 阶段从源码构建 FlyDSL 配套 ixcc/MLIR 和 Python wheel。
+FlyDSL 和 ixcc 的仓库与完整提交读取所选 ixformer 的 `version.json`，递归依赖
+继续由各仓库的 gitlink 固定。首次 LLVM/MLIR 构建耗时较长，后续可复用 Docker 层。
+
+运行时保留完整工具链 `/opt/flydsl/ixcc`，使用
+`FLYDSL_COMPILE_IXCC_DIR` 指向它，不把它加入全局 `PATH` 或 `LD_LIBRARY_PATH`。
+镜像默认后端选择保持原样；启用已支持的 FlyDSL 算子时传入
+`-e IXFORMER_KERNEL_BACKEND=flydsl`，也可按算子选择
+`-e IXFORMER_KERNEL_BACKEND=silu_and_mul:flydsl`。
+首次遇到新形状会进行 JIT，运行容器需要可写的缓存目录。
+
+FlyDSL 来源与工具链路径记录在 `/etc/iluvatar-flydsl-build-info.json`。
+此组合仅在 ivcore11 上验收，其他 GPU 架构会在 FlyDSL 源码准备阶段明确拒绝构建。
+
+构建认证默认使用 `--ssh default`。无 SSH agent 的环境也可通过 BuildKit
+`--secret id=gitconfig,env=BUILD_GIT_CONFIG` 临时提供 Git 配置；其中的认证仅在
+源码下载步骤可见，不复制进镜像层。不要通过 build arg 传入访问令牌。

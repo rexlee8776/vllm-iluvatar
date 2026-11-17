@@ -1,0 +1,21 @@
+# 对外导出排除清单。本文件只影响同步到外部仓库的内容，内部构建和测试不受影响。
+# 每一条都对应一次扫描命中；详情见同步机上的扫描报告。
+
+# 构建配置：内网 Git 地址（bitbucket.iluvatar.ai:7999）、内网镜像仓库、内部软件源
+Dockerfile
+Dockerfile.base
+docker/
+scripts/build_image.sh
+
+# 开发环境文档：内网 Git 克隆地址
+docs/guides/7-how-to-set-up-the-dev-environment.md
+
+# smoke 测试模型配置：内部模型站地址与未发布机型的内部命名
+tests/model_smoke/weights/
+
+# 该测试用例内含内网网段地址
+tests/v1/worker/prefill_state/test_lifecycle.py
+
+# 连接器默认地址指向内部部署网段。此处选择排除而非改写，
+# 以免改动内部运行时的默认行为。
+vllm_iluvatar/distributed/kv_transfer/kv_connector/v1/opt_nixl/
